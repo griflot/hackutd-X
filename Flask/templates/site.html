@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <h1 style="text-align: center;">
+        <img src="{{url_for('static', filename='icon_calculator.webp')}}"
+            alt="Icon" style="vertical-align: middle; height: 80px;">
+    </h1>
+    <h1 style="text-align: center;">Loan Readiness Calculator</h1>
+    <p style="text-align: center;">Are you looking to purchase a home? Enter your relevant information to determine if you are ready to be approved for a loan!</p>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Barlow+Condensed:400,700&display=swap">
+    <style>
+        body {
+            background-color: skyblue;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 300;
+            text-align: left;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .box {
+            margin: 10px;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            width: 60%; /* Adjust the width as needed */
+        }
+
+        .column {
+            float: left;
+            width: 100%;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .tab {
+            display: inline-block;
+            margin-left: 40px;
+        }
+
+        input[type=amount] {
+            width: 30%;
+            padding: 5px 5px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            background-color: white;
+            background-image: url("{{ url_for('static', filename='dollar.png')}}");
+            background-position: 5% 50%;
+            background-repeat: no-repeat;
+            padding-left: 30px;
+            background-size: 20px 20px;
+        }
+
+        input[type=number] {
+            width: 30%;
+            padding: 5px 5px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            background-color: white;
+            background-position: 5% 50%;
+            background-size: 20px 20px;
+        }
+
+        .center-graph {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #barGraph {
+            width: auto; 
+            height: auto;
+            object-fit: contain;
+        }
+
+        #graph-container {
+            max-width: auto;
+            max-height: auto; 
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            #barGraph {
+                width: 70%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #barGraph {
+                width: 60%;
+            }
+        }
+
+        /* Define the confetti particles with different styles */
+        .confetti-red {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%; /* For circular shape */
+            transform: rotate(45deg); /* For a rotated appearance */
+        }
+
+        .confetti-green {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            border-radius: 50%;
+            transform: rotate(-45deg);
+        }
+
+        .confetti-blue {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: blue;
+            border-radius: 50%;
+            transform: rotate(90deg);
+        }
+
+        @keyframes confettiBurst {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <div class="row">
+                <div class="column">
+                    <form onsubmit="createConfetti(); return false;">
+                        <h3>Credit Info:</h3>
+
+                        <label for="creditScore"><span class="tab"></span>Credit Score:</label>
+                        <input type="number" id="creditScore" name="creditScore" min="0"><br><br>
+                        <label for="creditScoreSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="creditScoreSlider" name="creditScoreSlider" min="0" max="850"><br><br>
+
+                        <label for="grossIncome"><span class="tab"></span>Gross Income:</label>
+                        <input type="amount" id="grossIncome" name="grossIncome" min="0"><br><br>
+                        <label for="grossIncomeSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="grossIncomeSlider" name="grossIncomeSlider" min="0" max="350000"><br><br>
+
+                        <h3>Monthly Debt Payments:</h3>
+
+                        <label for="creditCardPayment"><span class="tab"></span>Credit Card Payment?</label>
+                        <input type="checkbox" id="creditCardPaymentCheckbox" name="creditCardPaymentCheckbox"><br><br>
+
+                        <div id="creditCardPaymentContainer" style="display: none;">
+                            <label for="creditCardPaymentAmount"><span class="tab"></span>Amount?</label>
+                            <input type="range" id="creditCardPaymentSlider" name="creditCardPaymentAmount" min="0" max="10000"><br><br>
+                            <span class="tab"></span><input type="amount" id="creditCardPaymentAmount" name="creditCardPaymentAmountText" min="0"><br><br>
+                        </div>
+
+                        <label for="studentLoanPayment"><span class="tab"></span>Student Loans?</label>
+                        <input type="checkbox" id="studentLoanPaymentCheckbox" name="studentLoanPaymentCheckbox"><br><br>
+
+                        <div id="studentLoanPaymentContainer" style="display: none;">
+                            <label for="studentLoanPaymentAmount"><span class="tab"></span>Amount?</label>
+                            <input type="range" id="studentLoanPaymentSlider" name="studentLoanPaymentAmount" min="0" max="10000"><br><br>
+                            <span class="tab"></span><input type="amount" id="studentLoanPaymentAmount" name="studentLoanPaymentAmountText" min="0"><br><br>
+                        </div>
+
+                        <label for="carPayment"><span class="tab"></span>Car Payment?</label>
+                        <input type="checkbox" id="carPaymentCheckbox" name="carPaymentCheckbox"><br><br>
+
+                        <div id="carPaymentContainer" style="display: none;">
+                            <label for="carPaymentAmount"><span class="tab"></span>Amount?</label>
+                            <input type="range" id="carPaymentSlider" name="carPaymentSlider" min="0" max="10000"><br><br>
+                            <span class="tab"></span><input type="amount" id="carPaymentAmount" name="carPaymentAmount" min="0"><br><br>
+                        </div>
+
+                        <label for="morePayments"><span class="tab"></span>Additional Payments?</label>
+                        <input type="checkbox" id="morePaymentsCheckbox" name=",p"><br><br>
+
+                        <div id="morePaymentsContainer" style="display: none;">
+                            <label for="morePaymentsAmount"><span class="tab"></span>Amount?</label>
+                            <input type="range" id="morePaymentsSlider" name="morePaymentsSlider" min="0" max="30000"><br><br>
+                            <span class="tab"></span><input type="amount" id="morePaymentsAmount" name="morePaymentsAmount" min="0"><br><br>
+                        </div>
+
+                        <h3>Loan Info:</h3>
+
+                        <label for="appraisedValue"><span class="tab"></span>Appraised Value of Home:</label>
+                        <input type="amount" id="appraisedValue" name="appraisedValue" min="0"><br><br>
+                        <label for="appraisedValueSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="appraisedValueSlider" name="appraisedValueSlider" min="0" max="1000000"><br><br>
+
+                        <label for="downPayment"><span class="tab"></span>Down Payment:</label>
+                        <input type="amount" id="downPayment" name="downPayment" min="0"><br><br>
+                        <label for="downPaymentSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="downPaymentSlider" name="downPaymentSlider" min="0" max="150000"><br><br>
+
+                        <label for="loanAmount"><span class="tab"></span>Loan Amount:</label>
+                        <input type="amount" id="loanAmount" name="loanAmount" min="0"><br><br>
+                        <label for="loanAmountSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="loanAmountSlider" name="loanAmountSlider" min="0" max="500000"><br><br>
+
+                        <label for="mortgagePaymentAmount"><span class="tab"></span>Mortgage Payment:</label>
+                        <input type="amount" id="mortgagePaymentAmount" name="mortgagePaymentAmount" min="0"><br><br>
+                        <label for="mortgageAmountSlider"><span class="tab"></span>Amount?</label>
+                        <input type="range" id="mortgageAmountSlider" name="mortgageAmountSlider" min="0" max="150000"><br><br>
+                        
+                        <div id="confetti-container"></div>
+                        <input type="submit" value="Calculate" id="calculate-button">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="box">
+            <div class="column">
+                <h2><div id="creditScoreResult" style="color: green;"></div></h2>
+                <div class="center-graph">
+                    <div id="graph-container">
+                        <img src="{{ bar_graph_url }}" alt="Bar Graph" id="barGraph" style="width: 80%;">
+                    </div>
+                </div>
+                <ul>
+                    {% for id, result in results %}
+                        <li>For account {{ id }}, eligibility is {{ result }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div> 
+
+    <script>
+        const creditScoreSlider = document.getElementById("creditScoreSlider");
+        const creditScoreTextBox = document.getElementById("creditScore");
+
+        creditScoreSlider.addEventListener("input", function () {
+            creditScoreTextBox.value = creditScoreSlider.value;
+        });
+
+        const grossIncomeSlider = document.getElementById("grossIncomeSlider");
+        const grossIncomeTextBox = document.getElementById("grossIncome");
+
+        grossIncomeSlider.addEventListener("input", function () {
+            grossIncomeTextBox.value = grossIncomeSlider.value;
+        });
+
+        const creditCardCheckbox = document.getElementById("creditCardPaymentCheckbox");
+        const creditCardContainer = document.getElementById("creditCardPaymentContainer");
+        const creditCardSlider = document.getElementById("creditCardPaymentSlider");
+        const creditCardTextBox = document.getElementById("creditCardPaymentAmount");
+
+        creditCardCheckbox.addEventListener("change", function() {
+            creditCardContainer.style.display = creditCardCheckbox.checked ? "block" : "none";
+            // Set the slider and text box to their default values
+            creditCardSlider.value = 0;
+            creditCardTextBox.value = 0;
+        });
+
+        // Add an event listener to the slider
+        creditCardSlider.addEventListener("input", function () {
+            // Update the text box value with the slider value
+            creditCardTextBox.value = creditCardSlider.value;
+        });
+
+        const studentLoanCheckbox = document.getElementById("studentLoanPaymentCheckbox");
+        const studentLoanContainer = document.getElementById("studentLoanPaymentContainer");
+        const studentLoanSlider = document.getElementById("studentLoanPaymentSlider");
+        const studentLoanTextBox = document.getElementById("studentLoanPaymentAmount");
+
+        studentLoanCheckbox.addEventListener("change", function() {
+            studentLoanContainer.style.display = studentLoanCheckbox.checked ? "block" : "none";
+            studentLoanSlider.value = 0;
+            studentLoanTextBox.value = 0;
+        });
+
+        studentLoanSlider.addEventListener("input", function () {
+            // Update the text box value with the slider value
+            studentLoanTextBox.value = studentLoanSlider.value;
+        });
+
+        const carPaymentCheckbox = document.getElementById("carPaymentCheckbox");
+        const carPaymentContainer = document.getElementById("carPaymentContainer");
+        const carPaymentSlider = document.getElementById("carPaymentSlider");
+        const carPaymentTextBox = document.getElementById("carPaymentAmount");
+
+        carPaymentCheckbox.addEventListener("change", function() {
+            carPaymentContainer.style.display = carPaymentCheckbox.checked ? "block" : "none";
+            carPaymentSlider.value = 0;
+            carPaymentTextBox.value = 0;
+        });
+
+        carPaymentSlider.addEventListener("input", function() {
+            carPaymentTextBox.value = carPaymentSlider.value;
+        });
+
+        const morePaymentsCheckbox = document.getElementById("morePaymentsCheckbox");
+        const morePaymentsContainer = document.getElementById("morePaymentsContainer");
+        const morePaymentsSlider = document.getElementById("morePaymentsSlider");
+        const morePaymentsTextBox = document.getElementById("morePaymentsAmount");
+
+        morePaymentsCheckbox.addEventListener("change", function() {
+            morePaymentsContainer.style.display = morePaymentsCheckbox.checked ? "block" : "none";
+            morePaymentsSlider.value = 0;
+            morePaymentsTextBox.value = 0;
+        });
+
+        morePaymentsSlider.addEventListener("input", function() {
+            morePaymentsTextBox.value = morePaymentsSlider.value;
+        });
+
+        const appraisedValueTextBox = document.getElementById("appraisedValue");
+        const appraisedValueSlider = document.getElementById("appraisedValueSlider");
+
+        appraisedValueSlider.addEventListener("input", function () {
+            appraisedValueTextBox.value = appraisedValueSlider.value;
+        });
+
+        const downPaymentTextBox = document.getElementById("downPayment");
+        const downPaymentSlider = document.getElementById("downPaymentSlider");
+
+        downPaymentSlider.addEventListener("input", function () {
+            downPaymentTextBox.value = downPaymentSlider.value;
+        });
+
+        const loanAmountTextBox = document.getElementById("loanAmount");
+        const loanAmountSlider = document.getElementById("loanAmountSlider");
+
+        loanAmountSlider.addEventListener("input", function () {
+            loanAmountTextBox.value = loanAmountSlider.value;
+        });
+
+        const mortgageAmountTextBox = document.getElementById("mortgagePaymentAmount");
+        const mortgageAmountSlider = document.getElementById("mortgageAmountSlider");
+
+        mortgageAmountSlider.addEventListener("input", function () {
+            mortgageAmountTextBox.value = mortgageAmountSlider.value;
+        });
+
+        const calculateButton = document.getElementById('calculate-button');
+            calculateButton.addEventListener('click', function () {
+                createConfetti(100); // You can change the number of confetti pieces as needed
+                scrollToTop(); // Call the scrollToTop function
+            
+                const creditScore = parseFloat(document.getElementById('creditScore').value);
+                const grossIncome = parseFloat(document.getElementById('grossIncome').value);
+                const totalDebtPayments = calculateTotalDebtPayments();
+
+                const creditScoreResult = document.getElementById('creditScoreResult');
+                if (creditScore >= 640) {
+                    creditScoreResult.innerText = "Success";
+                    creditScoreResult.style.color = "green";
+                } else {
+                    creditScoreResult.innerText = "Low credit score";
+                    creditScoreResult.style.color = "red";
+                }
+
+                // Create a URL for the bar_graph endpoint with the data as parameters
+                const url = `/bar_graph?income=${grossIncome}&debt_payments=${totalDebtPayments}`;
+
+                // Send an HTTP GET request to the bar_graph endpoint
+                fetch(url)
+                    .then(response => response.blob())
+                    .then(data => {
+                        // Display the bar graph image on your webpage
+                        document.getElementById('barGraph').src = URL.createObjectURL(data);
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+
+        function calculateTotalDebtPayments() {
+            let totalDebtPayments = 0;
+
+            const creditCardCheckbox = document.getElementById("creditCardPaymentCheckbox");
+            if (creditCardCheckbox.checked) {
+                totalDebtPayments += parseFloat(document.getElementById('creditCardPaymentAmount').value);
+            }
+
+            const studentLoanCheckbox = document.getElementById("studentLoanPaymentCheckbox");
+            if (studentLoanCheckbox.checked) {
+                totalDebtPayments += parseFloat(document.getElementById('studentLoanPaymentAmount').value);
+            }
+
+            const carPaymentCheckbox = document.getElementById("carPaymentCheckbox");
+            if (carPaymentCheckbox.checked) {
+                totalDebtPayments += parseFloat(document.getElementById('carPaymentAmount').value);
+            }
+
+            totalDebtPayments += parseFloat(document.getElementById('mortgagePaymentAmount').value);
+
+            const morePaymentsCheckbox = document.getElementById("morePaymentsCheckbox");
+            if (morePaymentsCheckbox.checked) {
+                totalDebtPayments += parseFloat(document.getElementById('morePaymentsAmount').value);
+            }
+            return totalDebtPayments;
+        }
+
+        function createConfetti(numConfetti) {
+            const colors = ['red', 'green', 'blue']; // List of available colors
+            const confettiContainer = document.getElementById('confetti-container');
+
+            for (let i = 0; i < numConfetti; i++) {
+                const confetti = document.createElement('div');
+                const randomColor = colors[Math.floor(Math.random() * colors.length)]; // Randomly select a color
+                confetti.className = `confetti-${randomColor}`; // Use the selected color style
+                confetti.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+                confetti.style.top = `-${Math.random() * 100}vh`; // Random vertical position (above the screen)
+                confetti.style.animation = 'confettiBurst 2s linear'; // Adjust the animation duration as needed
+                confettiContainer.appendChild(confetti);
+
+                // Remove the confetti after the animation is complete
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+        function scrollToTop() {
+            window.scrollTo(0, 0); // Scroll to the top of the page
+        }
+    </script>
+</body>
+</html>
