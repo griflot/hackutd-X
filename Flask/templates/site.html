@@ -17,7 +17,7 @@
             margin: 0;
             padding: 30px;
         }
-
+        
         .container {
             display: flex;
             justify-content: center;
@@ -29,7 +29,7 @@
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 10px;
-            width: 60%; /* Adjust the width as needed */
+            width: 60%;
         }
 
         .column {
@@ -420,7 +420,7 @@
                 confetti.className = `confetti-${randomColor}`; // Use the selected color style
                 confetti.style.left = `${Math.random() * 100}vw`; // Random horizontal position
                 confetti.style.top = `-${Math.random() * 100}vh`; // Random vertical position (above the screen)
-                confetti.style.animation = 'confettiBurst 2s linear'; // Adjust the animation duration as needed
+                confetti.style.animation = 'confettiBurst 2s linear';
                 confettiContainer.appendChild(confetti);
 
                 // Remove the confetti after the animation is complete
@@ -430,7 +430,7 @@
             }
         }
         function scrollToTop() {
-            window.scrollTo(0, 0); // Scroll to the top of the page
+            window.scrollTo(0, 0); // Scroll to the top of the page function
         }
     </script>
 </body>
