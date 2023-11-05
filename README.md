@@ -3,6 +3,8 @@
 [Python 3](https://www.python.org/about/), [Flask](https://flask.palletsprojects.com/en/3.0.x/), [Matplotlib](https://matplotlib.org/), [Pandas](https://pandas.pydata.org/)
 
 ## Run Instructions
+Ensure Python3 is installed
+
 `git clone <repository>`
 
 `python3 -m pip install flask pandas matplotlib`
