@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
+from calculate import calculateApproval
+import json
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')  # Set the backend to Agg to avoid GUI issues
@@ -11,20 +13,46 @@ app = Flask(__name__)
 
 data = pd.read_csv('HackUTD-2023-HomeBuyerInfo.csv')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    results = []
-    for x in range(10):
-        result = canBuyHouse(x)
-        results.append((x, result))
+    if request.method == 'POST':
+        # Retrieve credit-related values from the form
+        creditScore = float(request.form.get('creditScore'))
+        grossIncome = float(request.form.get('grossIncome'))
+        creditCardPayment = float(request.form.get('creditCardPaymentAmount'))
+        studentLoanPayment = float(request.form.get('studentLoanPaymentAmount'))
+        carPayment = float(request.form.get('carPaymentAmount'))
+        monthlyMortgagePayment = float(request.form.get('mortgagePaymentAmount'))
+        appraisedValue = float(request.form.get('appraisedValue'))
+        downPayment = float(request.form.get('downPayment'))
+        loanAmount = appraisedValue - downPayment
 
-    gross_income = 0
-    total_debt_payments = 0
+        result, valueOne, valueTwo = calculateApproval(
+            creditScore, grossIncome, creditCardPayment, studentLoanPayment,
+            carPayment, monthlyMortgagePayment, appraisedValue, downPayment, loanAmount
+        )
 
-    # Create a URL for the bar_graph endpoint with the data as parameters
-    url = f'/bar_graph?income={gross_income}&debt_payments={total_debt_payments}'
+        # Rest of the code remains the same
+        # Create a URL for the bar_graph endpoint with the data as parameters
+        url = f'/bar_graph?income={grossIncome}&debt_payments={total_debt_payments}'
 
-    return render_template('site.html', results=results, bar_graph_url=url)
+        return render_template('site.html', result=result, valueOne=valueOne, valueTwo=valueTwo, bar_graph_url=url)
+
+        # This is the 'GET' request part of the route for rendering the initial form
+        return render_template('site.html')
+    else:
+        results = []
+        for x in range(10):
+            result = canBuyHouse(x)
+            results.append((x, result))
+
+        gross_income = 0
+        total_debt_payments = 0
+
+        # Create a URL for the bar_graph endpoint with the data as parameters
+        url = f'/bar_graph?income={gross_income}&debt_payments={total_debt_payments}'
+
+        return render_template('site.html', results=results, bar_graph_url=url)
 
 @app.route('/bar_graph')
 def bar_graph():
@@ -55,6 +83,11 @@ def bar_graph():
 
     # Serve the saved image
     return send_file(plot_filename, mimetype='image/png')
+
+@app.route('/calculate_approval', methods=['POST'])
+def sendCalculation():
+    data = request.json
+    tuple = calculateApproval(request.args.get('CreditScore', 'GrossMonthlyIncome', 'CreditCardPayment', 'StudentLoanPayment, CarPayment, MonthlyMortgagePayment, AppraisedValue, DownPayment, LoanAmount'))
 
 def canBuyHouse(id):
     currAcc = data.iloc[id]
