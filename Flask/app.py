@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, flash, redirect, url_for
 from calculate import calculateApproval
 import json
 import pandas as pd
@@ -32,27 +32,18 @@ def home():
             carPayment, monthlyMortgagePayment, appraisedValue, downPayment, loanAmount
         )
 
-        # Rest of the code remains the same
-        # Create a URL for the bar_graph endpoint with the data as parameters
-        url = f'/bar_graph?income={grossIncome}&debt_payments={total_debt_payments}'
-
-        return render_template('site.html', result=result, valueOne=valueOne, valueTwo=valueTwo, bar_graph_url=url)
-
-        # This is the 'GET' request part of the route for rendering the initial form
-        return render_template('site.html')
-    else:
         results = []
         for x in range(10):
             result = canBuyHouse(x)
             results.append((x, result))
 
-        gross_income = 0
-        total_debt_payments = 0
-
         # Create a URL for the bar_graph endpoint with the data as parameters
-        url = f'/bar_graph?income={gross_income}&debt_payments={total_debt_payments}'
+        url = f'/bar_graph?income={grossIncome}&debt_payments={total_debt_payments}'
 
-        return render_template('site.html', results=results, bar_graph_url=url)
+        return render_template('site.html', result=result, valueOne=valueOne, valueTwo=valueTwo, results=results, bar_graph_url=url)
+
+    # This is the 'GET' request part of the route for rendering the initial form
+    return render_template('site.html')
 
 @app.route('/bar_graph')
 def bar_graph():
@@ -86,8 +77,38 @@ def bar_graph():
 
 @app.route('/calculate_approval', methods=['POST'])
 def sendCalculation():
-    data = request.json
-    tuple = calculateApproval(request.args.get('CreditScore', 'GrossMonthlyIncome', 'CreditCardPayment', 'StudentLoanPayment, CarPayment, MonthlyMortgagePayment, AppraisedValue, DownPayment, LoanAmount'))
+    data = request.form  # Use request.form to get the form data
+    result, loweredAppraisedValue, raisedDownPayment = calculateApproval(
+        float(data['CreditScore']),
+        float(data['GrossMonthlyIncome']),
+        float(data['CreditCardPayment']),
+        float(data['StudentLoanPayment']),
+        float(data['CarPayment']),
+        float(data['MonthlyMortgagePayment']),
+        float(data['AppraisedValue']),
+        float(data['DownPayment']),
+        float(data['LoanAmount'])
+    )
+
+    confirmation_message = None
+    if result == 1:
+        confirmation_message = "Congratulations! You are likely to be approved for the loan."
+    elif result == -1:
+        confirmation_message = "Error in the given data. Please make sure the data is valid."
+    elif result == -2:
+        confirmation_message = "Your credit score is too low. Consider paying off credit cards on time."
+    elif result == -3:
+        confirmation_message = "Your Loan-to-Value (LTV) is too high. Consider a larger down payment or PMI."
+    elif result == -4:
+        confirmation_message = "Your Loan-to-Value (LTV) is too high. Consider a larger down payment."
+    elif result == -5:
+        confirmation_message = "Your Debt-to-Income (DTI) is too high. Consider a lower monthly mortgage rate."
+    elif result == -6:
+        confirmation_message = "Your Debt-to-Income (DTI) is too high. Consider transferring high-interest loans to low-interest credit cards."
+    elif result == -7:
+        confirmation_message = "Your Front-End Debt-to-Income (FEDTI) is too high. Consider a lower monthly mortgage rate."
+
+    return render_template('site.html', confirmation_message=confirmation_message)
 
 def canBuyHouse(id):
     currAcc = data.iloc[id]
