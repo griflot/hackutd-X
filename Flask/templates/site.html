@@ -236,14 +236,14 @@
                         <img src="{{ bar_graph_url }}" alt="Bar Graph" id="barGraph" style="width: 80%;">
                     </div>
                 </div>
-                <ul>
-                    {% for id, result in results %}
-                        <li>For account {{ id }}, eligibility is {{ result }}</li>
-                    {% endfor %}
-                </ul>
+                <h2>Loan Approval Result:</h2>
+                <div id="result">
+                    {% if confirmation_message %}
+                        {{ confirmation_message }}
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div> 
 
     <script>
         function blockInvalidVals(inputElement) {
