@@ -18,8 +18,8 @@ def home():
         result = canBuyHouse(x)
         results.append((x, result))
 
-    gross_income = 0  # Replace with the actual gross income value
-    total_debt_payments = 0  # Replace with the actual total debt payments value
+    gross_income = 0
+    total_debt_payments = 0
 
     # Create a URL for the bar_graph endpoint with the data as parameters
     url = f'/bar_graph?income={gross_income}&debt_payments={total_debt_payments}'
@@ -34,12 +34,11 @@ def bar_graph():
 
     # Check if both values are zero (empty chart)
     if gross_income == 0 and total_debt_payments == 0:
-        return "Chart is empty"  # You can customize this response as needed
-
+        return "Chart is empty"
 
     # Create a bar graph
     img = BytesIO()
-    fig, ax = plt.subplots(figsize=(8, 4))  # Adjust the size as needed
+    fig, ax = plt.subplots(figsize=(8, 4))
     categories = ['Gross Income', 'Total Debt Payments']
     values = [gross_income, total_debt_payments]
     ax.bar(categories, values, width=0.5)
