@@ -153,12 +153,12 @@
                         <h3>Credit Information:</h3>
 
                         <label for="creditScore"><span class="tab"></span>Credit Score:</label>
-                        <input type="number" id="creditScore" name="creditScore" min="0"><br><br>
+                        <input type="number" id="creditScore" name="creditScore" oninput="blockInvalidVals(this)" min="0" max="850"><br><br>
                         <label for="creditScoreSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="creditScoreSlider" name="creditScoreSlider" min="0" max="850"><br><br>
 
                         <label for="grossIncome"><span class="tab"></span>Gross Income:</label>
-                        <input type="amount" id="grossIncome" name="grossIncome" min="0"><br><br>
+                        <input type="amount" id="grossIncome" name="grossIncome" oninput="blockInvalidVals(this)" min="0"><br><br>
                         <label for="grossIncomeSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="grossIncomeSlider" name="grossIncomeSlider" min="0" max="350000"><br><br>
 
@@ -170,7 +170,7 @@
                         <div id="creditCardPaymentContainer" style="display: none;">
                             <label for="creditCardPaymentAmount"><span class="tab"></span>Amount?</label>
                             <input type="range" id="creditCardPaymentSlider" name="creditCardPaymentAmount" min="0" max="10000"><br><br>
-                            <span class="tab"></span><input type="amount" id="creditCardPaymentAmount" name="creditCardPaymentAmountText" min="0"><br><br>
+                            <span class="tab"></span><input type="amount" id="creditCardPaymentAmount" name="creditCardPaymentAmountText" oninput="blockInvalidVals(this)" min="0"><br><br>
                         </div>
 
                         <label for="studentLoanPayment"><span class="tab"></span>Student Loans?</label>
@@ -179,7 +179,7 @@
                         <div id="studentLoanPaymentContainer" style="display: none;">
                             <label for="studentLoanPaymentAmount"><span class="tab"></span>Amount?</label>
                             <input type="range" id="studentLoanPaymentSlider" name="studentLoanPaymentAmount" min="0" max="10000"><br><br>
-                            <span class="tab"></span><input type="amount" id="studentLoanPaymentAmount" name="studentLoanPaymentAmountText" min="0"><br><br>
+                            <span class="tab"></span><input type="amount" id="studentLoanPaymentAmount" name="studentLoanPaymentAmountText" oninput="blockInvalidVals(this)" min="0"><br><br>
                         </div>
 
                         <label for="carPayment"><span class="tab"></span>Car Payment?</label>
@@ -188,7 +188,7 @@
                         <div id="carPaymentContainer" style="display: none;">
                             <label for="carPaymentAmount"><span class="tab"></span>Amount?</label>
                             <input type="range" id="carPaymentSlider" name="carPaymentSlider" min="0" max="10000"><br><br>
-                            <span class="tab"></span><input type="amount" id="carPaymentAmount" name="carPaymentAmount" min="0"><br><br>
+                            <span class="tab"></span><input type="amount" id="carPaymentAmount" name="carPaymentAmount" oninput="blockInvalidVals(this)" min="0"><br><br>
                         </div>
 
                         <label for="morePayments"><span class="tab"></span>Additional Payments?</label>
@@ -197,28 +197,28 @@
                         <div id="morePaymentsContainer" style="display: none;">
                             <label for="morePaymentsAmount"><span class="tab"></span>Amount?</label>
                             <input type="range" id="morePaymentsSlider" name="morePaymentsSlider" min="0" max="30000"><br><br>
-                            <span class="tab"></span><input type="amount" id="morePaymentsAmount" name="morePaymentsAmount" min="0"><br><br>
+                            <span class="tab"></span><input type="amount" id="morePaymentsAmount" name="morePaymentsAmount" oninput="blockInvalidVals(this)" min="0"><br><br>
                         </div>
 
                         <h3>Loan Information:</h3>
 
                         <label for="appraisedValue"><span class="tab"></span>Appraised Value of Home:</label>
-                        <input type="amount" id="appraisedValue" name="appraisedValue" min="0"><br><br>
+                        <input type="amount" id="appraisedValue" name="appraisedValue" oninput="blockInvalidVals(this)" min="0"><br><br>
                         <label for="appraisedValueSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="appraisedValueSlider" name="appraisedValueSlider" min="0" max="1000000"><br><br>
 
                         <label for="downPayment"><span class="tab"></span>Down Payment:</label>
-                        <input type="amount" id="downPayment" name="downPayment" min="0"><br><br>
+                        <input type="amount" id="downPayment" name="downPayment" oninput="blockInvalidVals(this)" min="0"><br><br>
                         <label for="downPaymentSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="downPaymentSlider" name="downPaymentSlider" min="0" max="150000"><br><br>
 
                         <label for="loanAmount"><span class="tab"></span>Loan Amount:</label>
-                        <input type="amount" id="loanAmount" name="loanAmount" min="0"><br><br>
+                        <input type="amount" id="loanAmount" name="loanAmount" oninput="blockInvalidVals(this)" min="0"><br><br>
                         <label for="loanAmountSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="loanAmountSlider" name="loanAmountSlider" min="0" max="500000"><br><br>
 
                         <label for="mortgagePaymentAmount"><span class="tab"></span>Mortgage Payment:</label>
-                        <input type="amount" id="mortgagePaymentAmount" name="mortgagePaymentAmount" min="0"><br><br>
+                        <input type="amount" id="mortgagePaymentAmount" name="mortgagePaymentAmount" oninput="blockInvalidVals(this)" min="0"><br><br>
                         <label for="mortgageAmountSlider"><span class="tab"></span>Amount?</label>
                         <input type="range" id="mortgageAmountSlider" name="mortgageAmountSlider" min="0" max="150000"><br><br>
                         
@@ -246,6 +246,11 @@
     </div> 
 
     <script>
+        function blockInvalidVals(inputElement) {
+            inputElement.value = inputElement.value.replace(/-/, '');
+            inputElement.value = inputElement.value.replace(/[^0-9]/g, "");
+        }
+        
         const creditScoreSlider = document.getElementById("creditScoreSlider");
         const creditScoreTextBox = document.getElementById("creditScore");
 
